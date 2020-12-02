@@ -1,0 +1,1081 @@
+refinement
+  .help=Scope of parameters for structure refinement with phenix.refine
+{
+  crystal_symmetry
+    .help=Scope of space group and unit cell parameters
+    .caption = By default, PHENIX takes the unit cell specified in the \
+              reflections file (if supported by the format) and the space \
+              group specified in the CRYST1 record (if any) in the first \
+              PDB file.  However, inconsistencies between input files will \
+              be displayed when new files are loaded.
+    .style = auto_align
+  {
+    unit_cell=None
+      .type=unit_cell
+      .style = bold
+    space_group=None
+      .type=space_group
+      .style = bold
+  }
+
+  input
+    .help=Scope of input file names, labels, processing directions
+  {
+    pdb
+    {
+      include scope mmtbx.utils.pdb_params
+    }
+    include scope mmtbx.utils.neutron_data_str
+    include scope mmtbx.utils.xray_data_str
+    experimental_phases
+      .help=Scope of experimental phase information (HL coefficients)
+      .caption = If you choose to use experimental phase restraints in \
+          refinement, you must also select "Use experimental phases"\
+          and set the target function to "mlhl" in the "Other parameters"\
+          dialog.  (This is done automatically if phases were \
+          found when the reflection file was initially loaded.)
+      .short_caption = Experimental phases
+      .style = auto_align
+    {
+      include scope mmtbx.utils.experimental_phases_params
+    }
+    monomers
+      .help=Scope of monomers information (CIF files)
+      .short_caption = Molecular topology files
+    {
+      include scope mmtbx.utils.cif_params
+    }
+    sequence
+    {
+      file_name = None
+        .type = path
+        .short_caption = Sequences
+        .style = input_file file_type:seq hidden seq_file
+        .help = Sequence data in a text file (supported formats include \
+          FASTA, PIR, and raw text).  Currently this is only used by the \
+          PHENIX GUI for validation.
+    }
+    symmetry_safety_check = *error warning
+      .type=choice
+      .expert_level=2
+      .help=Check for consistency of crystal symmetry from model and data files
+  }
+
+  output
+    .help=Scope for output files
+  {
+    prefix=None
+      .type=str
+      .help=Prefix for all output files
+      .short_caption=File prefix
+      .input_size=150
+      .style = bold noauto
+    serial=None
+      .type=int
+      .help=Serial number for consequtive refinement runs
+      .short_caption=Run number
+      .style = hidden
+    serial_format="%03d"
+      .type=str
+      .help=Format serial number in output file name
+      .expert_level=2
+      .style = hidden
+    title = None
+      .type = str
+      .help = Brief string describing run
+      .input_size = 400
+      .style = bold noauto
+    write_eff_file=True
+      .type=bool
+      .short_caption=Write parameter (.eff) file
+    write_geo_file=True
+      .type=bool
+      .short_caption=Write geometry (.geo) file
+    write_final_geo_file=False
+      .type=bool
+      .short_caption= Write final geometry(.geo) file
+    write_def_file=True
+      .type=bool
+      .short_caption=Write .def file
+      .style = hidden
+    write_model_cif_file = False
+      .type=bool
+      .short_caption=Write final refined model into mmCIF file
+      .style = noauto
+    write_reflection_cif_file = False
+      .type=bool
+      .short_caption=Write Fobs, Fmodel and R-free-flags into mmCIF file
+      .style = noauto
+    export_final_f_model=False
+      .help=Write Fobs, Fmodel, various scales and more to MTZ file
+      .short_caption=Export final F(model) as MTZ file
+      .type=bool
+    write_maps=False
+      .type=bool
+      .short_caption = Write electron density maps in X-PLOR or CCP4 format
+      .style = noauto
+    write_map_coefficients=True
+      .type=bool
+      .short_caption = Write MTZ file with map coefficients for coot
+      .style = noauto
+    pickle_fmodel=False
+      .type = bool
+      .help = Dump final fmodel object into a pickle file.
+      .short_caption = Pickle F(model)
+    pickle_stats_by_cycle = False
+      .type = bool
+      .help = Dump monitored refinement statistics into a pickle file.
+      .expert_level = 3
+    n_resolution_bins = None
+      .type = int
+      .optional = True
+      .expert_level = 3
+      .short_caption = Number of resolution bins
+      .help = Sets the number of bins used for resolution-dependent \
+        statistics in output files and the Phenix GUI.  If None, the binning \
+        will be determined automatically.
+  }
+
+  electron_density_maps
+    .help=Electron density maps calculation parameters
+    .style = menu_item
+  {
+    apply_default_maps = None
+      .type = bool
+      .style = hidden
+    include scope mmtbx.maps.map_and_map_coeff_params_ncs_str
+  }
+
+  refine
+    .help = Scope of refinement flags (=flags defining what to refine) and \
+            atom selections (=atoms to be refined)
+    .short_caption = Strategies and atom selections
+  {
+    strategy = *individual_sites \
+               *individual_sites_real_space \
+                rigid_body \
+               *individual_adp \
+                group_adp \
+                tls \
+                nm  \
+               *occupancies \
+                group_anomalous
+      .type = choice(multi=True)
+      .help = Atomic parameters to be refined
+      .caption = XYZ_coordinates \
+                 Real-space \
+                 Rigid_body \
+                 Individual_B-factors \
+                 Group_B-factors \
+                 TLS_parameters \
+                 NM_parameters \
+                 Occupancies \
+                 Anomalous_groups
+      .short_caption=Refinement strategy
+      .style = noauto bold cols:4 help_anchor:strategy auto_launch_dialog:refinement.refine.sites.individual,refinement.refine.sites.individual,refinement.refine.sites.rigid_body,refinement.refine.adp.individual,refinement.refine.adp.group,refinement.refine.adp.tls,refinement.refine.adp.nm,refinement.refine.occupancies,refinement.refine.anomalous_scatterers
+    sites
+      .help = Scope of atom selections for coordinates refinement
+      .short_caption = Coordinate refinement
+      .style = menu_item auto_align scrolled parent_submenu:Atom_selections
+    {
+      individual = None
+        .type = atom_selection
+        .help = Atom selections for individual atoms
+        .multiple=True
+        .short_caption = XYZ refinement
+        .input_size = 400
+      torsion_angles = None
+        .type = atom_selection
+        .help = Atom selections for Torsion Angle Refinement and Dynamics
+        .multiple=True
+        .short_caption = Torsion angle dynamics
+        .input_size = 400
+      rigid_body = None
+        .type = atom_selection
+        .help = Atom selections for rigid groups
+        .multiple=True
+        .short_caption = Rigid-body groups
+        .input_size = 400
+        .style = use_list
+    }
+    adp
+      .help = Scope of atom selections for ADP (Atomic Displacement \
+              Parameters) refinement
+      .short_caption = ADP refinement
+      .style = auto_align scrolled
+    {
+      individual
+        .help = Scope of atom selections for refinement of individual ADP
+        .short_caption = Individual B-factors
+        .style = noauto menu_item parent_submenu:Atom_selections auto_align
+      {
+        isotropic = None
+          .type = atom_selection
+          .help = Selections for atoms to be refinement with isotropic ADP
+          .input_size = 400
+          .short_caption = Isotropic atoms
+        anisotropic = None
+          .type = atom_selection
+          .help = Selections for atoms to be refinement with anisotropic ADP
+          .input_size = 400
+          .short_caption = Anisotropic atoms
+      }
+      group_adp_refinement_mode = *one_adp_group_per_residue \
+                                   two_adp_groups_per_residue \
+                                   group_selection
+        .type = choice(multi=False)
+        .help = Select one of three available modes for group B-factors \
+                refinement.  For two groups per residue, the groups will be \
+                main-chain and side-chain atoms.  Provide selections for \
+                groups if group_selection is chosen.
+        .caption = One_B-factor_group_per_residue \
+                   Two_B-factor_groups_per_residue \
+                   Group_selection
+        .short_caption = Group B-factor refinement mode
+        .style = noauto
+      group = None
+        .type = atom_selection
+        .multiple=True
+        .help = One isotropic ADP for group of selected here atoms will be \
+                refined
+        .short_caption=B-factor group selection
+        .input_size = 400
+        .style = use_list bold menu_item parent_submenu:Atom_selections
+      tls = None
+        .type = atom_selection
+        .multiple=True
+        .help = Selection(s) for TLS group(s)
+        .short_caption = TLS groups
+        .input_size = 400
+        .style = use_list bold menu_item expand parent_submenu:Atom_selections
+      nm  = None
+        .type = atom_selection
+        .multiple = True
+        .help = Selection(s) for NM group(s)
+        .short_caption = NM groups
+        .input_size = 400
+        .style = use_list bold menu_item expand parent_submenu:Atom_selections
+    }
+    occupancies
+      .help = Scope of atom selections for occupancy refinement
+      .short_caption = Occupancy refinement
+      .caption = By default, all atoms with alternate conformations or \
+                partial occupancies will have their occupancies refined.  You \
+                may override this by manually specifying selections to \
+                refine ("Individual atoms") or exclude from refinement \
+                ("Fix occupancies").  For constrained occupancy groups, \
+                choose "Constrained occupancy groups" from \
+                the "Atom selections" submenu in the Settings menu.
+      .style = menu_item scrolled auto_align parent_submenu:Atom_selections
+    {
+      individual = None
+        .type = atom_selection
+        .multiple=True
+        .help = Selection(s) for individual atoms. None is default which is to \
+                refine the individual occupancies for atoms in alternative \
+                conformations or for atoms with partial occupancies only.
+        .short_caption=Individual atoms
+        .input_size = 400
+        .style = use_list
+      remove_selection = None
+        .type = atom_selection
+        .multiple=True
+        .help = Occupancies of selected atoms will not be refined (even though \
+                they might satisfy the default criteria for occupancy \
+                refinement).
+        .short_caption = Fix occupancies
+        .style = use_list
+      constrained_group
+        .multiple = True
+        .help = Selections to define constrained occupancies. If only one \
+          selection is provided then one occupancy factor per selected atoms \
+          will be refined and it will be constrained between predefined max \
+          and min values.
+        .short_caption = Constrained occupancy groups
+      {
+        selection = None
+          .type = atom_selection
+          .multiple = True
+          .help = Atom selection string.
+      }
+    }
+    anomalous_scatterers
+      .short_caption = Anomalous sites
+      .style = menu_item scrolled parent_submenu:Atom_selections
+    {
+      group
+        .optional = True
+        .multiple = True
+        .short_caption = Anomalous scatterer group
+        .style = auto_align
+      {
+        selection = None
+          .type = atom_selection
+          .short_caption = Atom selection
+          .input_size = 400
+        f_prime = 0
+          .type = float
+          .short_caption = f'
+        f_double_prime = 0
+          .type = float
+          .short_caption = f''
+        refine = *f_prime *f_double_prime
+          .optional = True
+          .type = choice(multi=True)
+          .short_caption = Refine anomalous scattering factors
+      }
+    }
+  }
+  main
+    .help = Scope for most common and frequently used parameters
+    .style = scrolled menu_item auto_align
+    .short_caption = Global refinement parameters
+  {
+    bulk_solvent_and_scale = True
+      .type = bool
+      .help = Do bulk solvent correction and anisotropic scaling
+      .short_caption = Bulk solvent correction/scaling
+      .style = bold
+      .expert_level = 1
+    apply_overall_isotropic_scale_to_adp = True
+      .type = bool
+      .expert_level = 2
+    flip_peptides = False
+      .type = bool
+      .short_caption = Fix misfit peptide bonds
+    nqh_flips = True
+      .type = bool
+      .short_caption = Automatically correct N/Q/H errors
+      .style = bold noauto
+    use_molprobity = True
+      .type = bool
+      .expert_level = 2
+    simulated_annealing = False
+      .type = bool
+      .help = Do simulated annealing
+      .short_caption = Simulated annealing (Cartesian)
+      .style = noauto bold
+    simulated_annealing_torsion = False
+      .type = bool
+      .help = Do simulated annealing in torsion angle space
+      .short_caption = Simulated annealing (Torsion angles)
+      .style = noauto bold
+    ordered_solvent = False
+      .type = bool
+      .help = Add (or/and remove) and refine ordered solvent molecules (water)
+      .short_caption=Update waters
+      .style = noauto bold
+    place_ions = False
+      .type = bool
+      .short_caption = Place single-atom ions
+      .help = If enabled, Phenix will attempt to replace specific solvent \
+        atoms with elemental ions.  See associated ion_placement parameters \
+        for more options.
+      .expert_level = 3
+    ncs = False
+      .type = bool
+      .help = Use restraints NCS in refinement (can be determined automatically)
+      .short_caption = NCS restraints
+      .style = noauto bold
+    ias = False
+      .type = bool
+      .help = Build and use IAS (interatomic scatterers) model (at resolutions \
+             higher than approx. 0.9 A)
+      .short_caption=Model interatomic scattering
+      .style = bold
+    number_of_macro_cycles = 3
+      .type = int(value_min=0)
+      .optional = False
+      .help = Number of macro-cycles to be performed
+      .short_caption=Number of cycles
+      .input_size = 50
+      .style = noauto spinner bold
+    max_number_of_iterations = 25
+      .type = int
+      .short_caption = Maximum interations
+      .expert_level=1
+    use_form_factor_weights = False
+      .type = bool
+      .expert_level=2
+    tan_u_iso = False
+      .type = bool
+      .help = Use tan() reparameterization in ADP refinement (currently \
+              disabeled)
+      .expert_level=2
+      .style = hidden
+    use_geometry_restraints = True
+      .type = bool
+      .expert_level = 2
+    secondary_structure_restraints = False
+      .type = bool
+      .help = Adds distance restraints for hydrogen bonds involved in \
+        secondary structure.  Annotation will be done automatically if no \
+        helix or sheet records are specified, but this depends on having a \
+        good starting structure.  Nucleic acid base pairs (Watson-Crick and \
+        G-U only) will also be restrained if present.
+      .style = bold noauto
+    hydrogen_bonds = False
+      .type = bool
+    reference_model_restraints = False
+      .type = bool
+      .help = Restrains the dihedral angles to a high-resolution reference \
+        structure to reduce overfitting at low resolution.  You will need to \
+        specify a reference PDB file (in the input list in the main window) \
+        to use this option.
+      .style = bold noauto
+    use_convergence_test = False
+      .type = bool
+      .help = Determine if refinement converged and stop then
+      .expert_level=2
+    target = *auto ml mlhl ml_sad ls
+      .type = choice
+      .help = Choices for refinement target
+      .short_caption = Target function
+      .caption = Automatic ML MLHL ML-SAD_(DEVELOPER_ONLY) LS
+      .input_size = 120
+      .expert_level=0
+      .style = bold noauto OnChange:toggle_phases_and_target
+    min_number_of_test_set_reflections_for_max_likelihood_target = 50
+      .type = int
+      .help = minimum number of test reflections required for use of ML target
+      .short_caption = Minimum test set Fs for ML target
+      .expert_level=2
+    max_number_of_resolution_bins = 30
+      .type = int
+    reference_xray_structure = None
+      .type = str
+      .expert_level=2
+    use_experimental_phases = None
+      .type = bool
+      .help = Use experimental phases if available.  If true, the target \
+              function must be set to "mlhl", and a file containing \
+              Hendrickson-Lattman coefficients must be supplied.
+      .short_caption = Use experimental phase restraints
+      .expert_level=0
+      .style = bold noauto OnChange:toggle_phases_and_target
+    random_seed = 2679941
+      .type = int
+      .help = Ransom seed
+      .expert_level=2
+    scattering_table = wk1995  it1992  *n_gaussian electron neutron
+      .type = choice
+      .help = Choices of scattering table for structure factors calculations
+      .expert_level=0
+      .style = bold noauto
+    # XXX FUTURE
+    wavelength = None
+      .type = float
+      .expert_level = 3
+      .help = X-ray wavelength, currently for testing only
+    use_normalized_geometry_target = True
+      .type = bool
+      .expert_level=2
+    target_weights_only = False
+      .type = bool
+      .help = Calculate target weights only and exit refinement
+      .short_caption = Calculate target weights only
+      .expert_level=2
+    use_f_model_scaled = False
+      .type = bool
+      .help = Use Fmodel structure factors multiplied by overall scale factor \
+              scale_k1
+      .short_caption = Use scaled F(model) structure factors
+      .expert_level=2
+    max_d_min=0.25
+      .type = float
+      .help = Highest allowable resolution limit for refinement
+      .expert_level=1
+      .short_caption = Maximum resolution
+      .style = hidden
+    fake_f_obs = False
+      .type = bool
+      .help = Substitute real experimental Fobs with those calculated from \
+              input model (scales and solvent can be added)
+      .short_caption = Substitute fake F(obs)
+      .expert_level = 2
+      .style = dialog_link:refinement.fake_f_obs
+    optimize_mask = False
+      .type = bool
+      .help = Refine mask parameters (solvent_radius and \
+              shrink_truncation_radius)
+      .short_caption = Refine mask parameters
+      .expert_level=2
+    occupancy_max = 1.0
+      .type = float
+      .help = Maximum allowable occupancy of an atom
+      .short_caption=Maximum allowable occupancy
+      .expert_level=1
+    occupancy_min = 0.0
+      .type = float
+      .help = Minimum allowable occupancy of an atom
+      .short_caption=Minimum allowable occupancy
+      .expert_level=1
+    stir = None
+      .type = floats
+      .help = Stepwise increase of resolution: start refinement at lower \
+              resolution and gradually proceed with higher resolution
+      .short_caption = Stepwise increase of resolution
+      .expert_level=1
+      # XXX FUTURE float(N), N - any integer, N > 0
+    rigid_bond_test = False
+      .type = bool
+      .help = Compute Hirshfeld's rigid bond test value (RBT)
+      .short_caption = Compute rigid bond test value
+      .expert_level=2
+    show_residual_map_peaks_and_holes = False
+      .type = bool
+      .help = Show highest peaks and deepest holes in residual_map.
+      .expert_level=1
+    fft_vs_direct = False
+      .type = bool
+      .help = Check accuracy of approximations used in Fcalc calculations
+      .short_caption=Check FFT accuracy
+      .expert_level=2
+    switch_to_isotropic_high_res_limit = 1.5
+      .type = float
+      .help = If the resolution is lower than this limit, all atoms selected \
+              for individual ADP refinement and not participating in TLS \
+              groups will be automatically converted to isotropic, whether or \
+              not ANISOU records are present in the input PDB file.
+      .short_caption = Resolution limit for automatic anisotropic ADPs
+    find_and_add_hydrogens = False
+      .type = bool
+      .help = Find H or D atoms using difference map and add them to the \
+              model. This option should be used if ultra-high resolution data \
+              is available or when refining againts neutron data.
+      .expert_level=1
+    process_pdb_file_reference = False
+      .type = bool
+      .style = noauto
+    correct_special_position_tolerance=1.0
+      .type = float
+      .expert_level=3
+    use_statistical_model_for_missing_atoms = False
+      .type = bool
+      .expert_level=3
+      .style = bold
+    nproc = 1
+      .type = int
+      .short_caption = Number of processors
+      .help = Determines number of processor cores to use in parallel \
+        routines.  Currently, this only applies to automatic TLS group \
+        identification.
+      .expert_level = 2
+      .input_size = 48
+      .style = bold noauto renderer:draw_nproc_widget help_page:refinement.htm \
+        help_anchor:parallel
+    update_f_part1 = True
+      .type = bool
+      .expert_level = 3
+    truncate_at_pdb_format_precision = False
+      .type = bool
+      .expert_level = 2
+    harmonic_restraints = False
+      .type = bool
+      .short_caption = Restrain atoms to starting coordinates
+      .help = Restrains coordinates in Cartesian space to stay near their \
+        starting positions.  This is intended for use in generating \
+        simulated annealing omit maps, to prevent refined atoms from \
+        collapsing in on the region missing atoms.  For conserving geometry \
+        quality at low resolution, the more flexible reference model \
+        restraints should be used instead.
+  }
+
+  statistical_model_for_missing_atoms
+    .style = auto_align menu_item parent_submenu:advanced
+  {
+    include scope mmtbx.resolve_resources.phenix_masks_master_params
+  }
+
+  modify_start_model
+    .help = Scope of parameters to modify initial model before refinement
+    .style = menu_item parent_submenu:advanced
+  {
+    include scope mmtbx.pdbtools.modify_params
+    omit_selection = None
+      .type = atom_selection
+      .short_caption = Omit atom selection
+      .style = noauto
+  }
+
+  fake_f_obs
+    .help = Scope of parameters to simulate Fobs
+    .short_caption = Fake F(obs)
+    .expert_level=2
+    .style = menu_item parent_submenu:advanced auto_align
+  {
+    include scope mmtbx.command_line.fmodel.fmodel_from_xray_structure_params
+    r_free_flags_fraction = None
+      .type = float
+    scattering_table = wk1995  it1992  *n_gaussian  neutron
+      .type = choice
+      .help = Choices of scattering table for structure factors calculations
+      .expert_level=1
+  }
+
+  hydrogens
+    .help = Scope of parameters for H atoms refinement
+    .expert_level=1
+    .style = menu_item parent_submenu:advanced
+  {
+    include scope mmtbx.hydrogens.hydrogens_master_params_str
+    build
+    {
+      include scope mmtbx.hydrogens.find.master_params_part1
+      include scope mmtbx.hydrogens.find.master_params_part2
+    }
+    local_real_space_fit_angular_step = 0.5
+      .type = float
+      .expert_level = 2
+  }
+
+  group_b_iso
+    .short_caption = Group Isotropic B-factors
+    .style = menu_item parent_submenu:ADP_settings auto_align
+  {
+    include scope mmtbx.refinement.adp_refinement.group_adp_master_params
+  }
+
+  adp
+    .short_caption = Individual B-factors
+    .style = menu_item parent_submenu:ADP_settings auto_align
+  {
+    include scope mmtbx.refinement.adp_refinement.individual_adp_master_params
+  }
+
+  tls
+    .short_caption = TLS
+    .style = menu_item parent_submenu:ADP_settings auto_align
+  {
+    find_automatically = None
+      .type = bool
+      .short_caption = Find TLS groups automatically
+      .style = bold tribool
+    include scope mmtbx.refinement.adp_refinement.tls_master_params
+  }
+
+  nm
+    .short_caption = NM
+    .style = menu_item parent_submenu:ADP_settings auto_align
+  {
+    include scope mmtbx.refinement.adp_refinement.nm_master_params
+  }
+
+  adp_restraints
+    .short_caption = ADP restraints
+    .style = menu_item parent_submenu:ADP_settings auto_align
+  {
+    include scope mmtbx.refinement.adp_refinement.adp_restraints_master_params
+  }
+
+  group_occupancy
+    .short_caption=Group occupancy refinement
+    .expert_level=1
+    .style = menu_item parent_submenu:advanced auto_align
+  {
+    number_of_macro_cycles = 3
+      .type = int
+    max_number_of_iterations = 25
+      .type = int
+    convergence_test = False
+      .type = bool
+    run_finite_differences_test = False
+      .type = bool
+      .expert_level=2
+  }
+
+  group_anomalous
+    .short_caption=Group anomalous refinement
+    .expert_level=1
+    .style = menu_item parent_submenu:advanced
+  {
+    number_of_minimizer_cycles = 3
+      .type = int
+    lbfgs_max_iterations = 20
+      .type = int
+      .short_caption = Max. number of minimizer iterations
+    number_of_finite_difference_tests = 0
+      .type = int
+    find_automatically = False
+      .type = bool
+      .expert_level = 3
+  }
+
+  rigid_body
+    .help = Scope of parameters for rigid body refinement
+    .short_caption = Rigid-body refinement parameters
+    .style = menu_item auto_align
+  {
+    include scope mmtbx.refinement.rigid_body.master_params
+  }
+
+  ncs
+    .caption = These parameters only apply to global NCS restraints. \
+               The default setting for the excessive distance limit is a \
+               frequent source of errors in phenix.refine, especially when \
+               NCS restraints have not been applied consistently or the \
+               structure has been auto-built.  To avoid this error, leave the \
+               field empty.
+    .short_caption = Global NCS
+    .style = scrolled menu_item auto_align box
+  {
+    find_automatically = True
+      .type = bool
+      .style = bold
+      .short_caption = Find NCS restraints automatically
+      .help = If enabled, Phenix will ignore existing restraint groups and \
+        attempt to define appropriate selections by comparing chains.  This \
+        only applies to global NCS restraints - if torsion restraints are \
+        used, the restraint groups will always be defined automatically \
+        unless the user provides custom selections.
+    type = *torsion cartesian
+      .type = choice(multi=False)
+      .short_caption = NCS type
+      .caption = torsion-angle global
+      .style = bold noauto
+    coordinate_sigma=None
+      .type = float
+      .expert_level=1
+    restrain_b_factors = False
+      .type = bool
+      .short_caption = Restrain NCS-related B-factors
+      .help = If enabled, b-factors will be restrained for NCS-related atoms. \
+        Otherwise, atomic b-factors will be refined independently, and \
+        b_factor_weight will be set to 0.0
+      .style = noauto bold
+    b_factor_weight=None
+      .type=float
+      .short_caption = Weight on NCS-related B-factor restraints
+    excessive_distance_limit = 1.5
+      .type = float
+      .style = bold
+    special_position_warnings_only = False
+      .type = bool
+      .expert_level=2
+    include scope phenix.command_line.simple_ncs_from_pdb.ncs_master_params
+    include scope phenix.command_line.simple_ncs_from_pdb.restraint_group_params
+    torsion
+      .style = noauto menu_item auto_align box
+      .short_caption = Torsion-angle NCS
+    {
+      include scope mmtbx.torsion_restraints.torsion_ncs.torsion_ncs_params
+    }
+    #average_maps_in_rsr = False
+    #  .type = bool
+    #  .expert_level = 3
+    #  .style = noauto
+    #  .short_caption = NCS-average maps in real-space refinement
+    #  .help = Perform NCS averaging of maps used for real-space refinement. \
+    #    Experimental function, for developer use only.
+    map_averaging
+      .style = box noauto
+      .short_caption = NCS averaging
+    {
+      include scope mmtbx.map_tools.ncs_averaging_params
+    }
+  }
+
+  modify_f_obs
+  {
+  remove = random strong weak strong_and_weak low other
+    .type = choice(multi=False)
+    .short_caption = Remove reflections
+  remove_fraction = 0.1
+    .type = float
+  fill_mode = fobs_mean_mixed_with_dfmodel \
+              random \
+              fobs_mean \
+              *dfmodel
+    .type = choice(multi=False)
+  }
+
+  pdb_interpretation
+    .short_caption = Model interpretation
+    .expert_level = 2
+    .style = menu_item parent_submenu:advanced scrolled
+  {
+    include scope mmtbx.monomer_library.pdb_interpretation.master_params
+  }
+
+  geometry_restraints.edits
+    .short_caption = Edit geometry restraints
+    .style = menu_item parent_submenu:geometry_restraints scrolled
+    .expert_level = 2
+  {
+    include scope \
+      mmtbx.monomer_library.pdb_interpretation.geometry_restraints_edits_str
+  }
+
+  geometry_restraints.remove
+    .short_caption = Remove geometry restraints
+    .expert_level = 2
+    .style = menu_item parent_submenu:geometry_restraints scrolled
+  {
+    include scope \
+      mmtbx.monomer_library.pdb_interpretation.geometry_restraints_remove_str
+  }
+
+  ordered_solvent
+    .expert_level=1
+    .style = scrolled menu_item auto_align
+  {
+    include scope mmtbx.solvent.ordered_solvent.master_params_str
+  }
+
+  peak_search
+    .short_caption = Map peak search
+    .expert_level=1
+    .style= menu_item parent_submenu:advanced auto_align
+  {
+    include scope mmtbx.find_peaks.master_params
+  }
+
+  bulk_solvent_and_scale
+    .expert_level=1
+    .style = scrolled menu_item parent_submenu:advanced auto_align
+  {
+    mode = slow *fast
+      .type = choice(multi=False)
+    include scope mmtbx.bulk_solvent.bulk_solvent_and_scaling.master_params
+  }
+
+  alpha_beta
+    .short_caption = ML target parameters
+    .expert_level=2
+    .style = menu_item parent_submenu:advanced auto_align
+  {
+    include scope mmtbx.f_model.alpha_beta_master_params
+  }
+
+  mask
+    .style = menu_item parent_submenu:advanced auto_align
+    .expert_level=1
+  {
+    include scope mmtbx.masks.mask_master_params
+  }
+  tardy
+    .expert_level=2
+    .style = menu_item parent_submenu:advanced auto_align
+    .short_caption = Torsion angle dynamics
+    .help = Under development
+  {
+    mode = every_macro_cycle *second_and_before_last once first first_half
+      .type = choice
+    include scope mmtbx.refinement.tardy.master_phil_str
+  }
+  cartesian_dynamics
+    .expert_level=2
+    .style = menu_item parent_submenu:advanced auto_align
+  {
+    include scope mmtbx.dynamics.cartesian_dynamics.master_params
+  }
+  simulated_annealing
+    .expert_level=1
+    .style = scrolled menu_item parent_submenu:advanced auto_align
+  {
+    include scope mmtbx.dynamics.simulated_annealing.master_params_str
+  }
+
+  target_weights
+    .short_caption = Refinement target weights
+    .expert_level=2
+    .caption = None
+    .style  = menu_item auto_align
+  {
+    include scope phenix.refinement.weight_xray_chem.master_params_str
+  }
+
+  ias
+    .short_caption = Interatomic scattering
+    .style = scrolled menu_item parent_submenu:advanced
+  {
+    include scope mmtbx.ias.__init__.ias_master_params
+  }
+
+  ls_target_names
+    .caption = "Family of least-squares target functions"
+    .short_caption = Least-squares targets
+    .expert_level=2
+    .style= menu_item parent_submenu:advanced
+  {
+    target_name =*ls_wunit_k1  ls_wunit_k2  ls_wunit_kunit ls_wunit_k1_fixed \
+                  ls_wunit_k1ask3_fixed \
+                  ls_wexp_k1   ls_wexp_k2   ls_wexp_kunit  \
+                  ls_wff_k1    ls_wff_k2    ls_wff_kunit  ls_wff_k1_fixed \
+                  ls_wff_k1ask3_fixed \
+                  lsm_kunit    lsm_k1 lsm_k2  lsm_k1_fixed  lsm_k1ask3_fixed
+      .type = choice
+      .short_caption = Least-squares target name
+  }
+
+  twinning
+    .style = menu_item auto_align
+  {
+     include scope mmtbx.twinning.twin_f_model.master_params
+  }
+
+  structure_factors_and_gradients_accuracy
+    .expert_level=2
+    .style  = menu_item parent_submenu:advanced
+  {
+    include scope mmtbx.f_model.sf_and_grads_accuracy_master_params
+  }
+
+  r_free_flags
+    .short_caption = R_free flags
+    .expert_level=2
+    .style = menu_item parent_submenu:advanced
+  {
+    fraction = 0.1
+      .type = float
+      .short_caption = Fraction of reflections to flag as test set
+    max_free = 2000
+      .type = int
+      .short_caption = Maximum number of test set reflections
+    lattice_symmetry_max_delta=5.0
+      .type = float
+      .help = Tolerance used in the determination of the highest lattice \
+              symmetry. Can be thought of as angle between lattice vectors \
+              that should line up perfectly if the symmetry is ideal. A \
+              typical value is 3 degrees.
+    use_lattice_symmetry=True
+      .type = bool
+      .help = When generating Rfree flags, do so in the asymmetric unit of the \
+              highest lattice symmetry. The result is an Rfree set suitable \
+              for twin refinement.
+  }
+
+  include scope mmtbx.refinement.fit_rotamers.master_params_str
+
+  flip_peptides
+    .short_caption = Peptide flips
+    .style = menu_item parent_submenu:advanced auto_align
+  {
+    include scope mmtbx.refinement.flip_peptides.master_params_str
+  }
+
+  secondary_structure
+    .short_caption = Secondary structure
+    .expert_level = 2
+    .caption = These options set up secondary structure restraints for \
+      refinement.  Note that none of these options will be processed unless \
+      the "Secondary structure restraints" box is checked in the main \
+      window.
+    .style = menu_item caption_img:icons/custom/phenix.find_helices_strands.png
+  {
+    include scope mmtbx.secondary_structure.sec_str_master_phil
+  }
+
+  hydrogen_bonding
+    .short_caption = Hydrogen bond restraints
+    .expert_level = 2
+    .style = menu_item parent_submenu:advanced auto_align
+  {
+    include scope mmtbx.geometry_restraints.hbond.master_phil
+  }
+
+  reference_model
+    .caption = The reference model is used to steer refinement of the \
+      working model.  This technique is advantageous in cases where the \
+      working data set is low resolution, but there is a known related \
+      structure solved at higher resolution.  The higher resolution \
+      reference model is used to generate a set of dihedral restraints \
+      that are applied to each matching dihedral in the working model. \
+      To specify a PDB file as the reference model, add it to the list of \
+      input files in the main window, then change the data type from \
+      "Input model" to "Reference model".
+    .style = box auto_align menu_item
+    .short_caption = Reference model restraints
+  {
+    use_distance_based_target = False
+      .type = bool
+      .expert_level = 3
+    include scope \
+      mmtbx.torsion_restraints.reference_model.reference_model_params
+  }
+
+  ion_placement
+    .expert_level = 3
+    .caption = These options control the identification of elemental ions \
+       from the existing solvent model. The default search set includes Mg, \
+        Cl, Ca, and Zn, but it is recommended to explicitly specify the \
+        elements to search for.  Requires relatively high resolution and a \
+        nearly-complete structure to work reliably, and anomalous data are \
+        extremely helpful.
+    .style = box auto_align menu_item parent_submenu=advanced \
+      caption_img:icons/custom/phenix.autosol.png
+  {
+    include scope mmtbx.ions.build.ion_building_params_str
+    include scope mmtbx.ions.ion_master_phil
+  }
+
+  harmonic_restraints
+    .expert_level = 3
+    .help = Parameters for harmonic restraints on starting coordinates
+    .style = auto_align menu_item parent_submenu:advanced
+  {
+    sigma = 0.2
+      .type = float
+      .short_caption = Sigma for restraints to initial coordinates
+      .help = Sigma for harmonic restraints to initial coordinates
+    selection = None
+      .type = atom_selection
+      .short_caption = Selection to restrain to initial coordinates
+      .help = Selection to restrain to initial coordinates.  If none is \
+        specified, all atoms will be restrained.
+  }
+
+  gui
+    .short_caption = GUI settings
+    .help = Miscellaneous parameters for phenix.refine GUI
+    .style = noauto
+    .expert_level=3
+  {
+    base_output_dir = None
+      .type = path
+      .short_caption = Output directory
+      .style = bold output_dir
+    tmp_dir = None
+      .type = path
+      .short_caption = Temporary file directory
+      .style = hidden
+    send_notification = False
+      .type = bool
+      .short_caption = Send e-mail notification when refinement is done
+      .style = bold
+    notify_email = None
+      .type = str
+      .short_caption = E-mail address to use
+    add_hydrogens = False
+      .type = bool
+      .short_caption = Automatically add hydrogens to model
+      .help = Runs phenix.ready_set to add hydrogens prior to refinement.
+      .style = bold auto_launch_dialog:refinement.gui.ready_set_hydrogens
+    skip_rsr = False
+      .type = bool
+      .short_caption = Skip real-space correlation step in validation
+    skip_kinemage = False
+      .type = bool
+      .short_caption = Skip kinemage generation in validation
+    phil_file = None
+      .type = path
+      .multiple = True
+      .optional = True
+      .short_caption = Parameter file
+      .style = hidden file_type:phil input_file
+    ready_set_hydrogens
+      .short_caption = ReadySet options
+      .caption = These options will only be applied if you have checked \
+        the box 'Automatically add hydrogens to model' in the main window. \
+        Note that you can run ReadySet by itself by clicking the button on \
+        the toolbar, which will also enable generation of CIF restraint files \
+        and metal coordination restraints.  To run ReadySet automatically, \
+        you must have already supplied CIF files for all unknown ligands.
+      .style = menu_item caption_img:icons/custom/phenix.ready_set.png
+    {
+      include scope elbow.command_line.ready_set.h_d_options_params
+    }
+  }
+  include scope mmtbx.geometry_restraints.external.external_energy_params_str
+  include scope phenix.refinement.developer_params
+}
